@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx" 
+					   showStatusBar="false"
+					   applicationComplete="handler_windowedapplication1applicationComplete(event)">
+
+	<fx:Style>
+		@namespace s "library://ns.adobe.com/flex/spark";
+		@namespace mx "library://ns.adobe.com/flex/mx";
+		global
+		{
+			fontSize:14;
+			fontFamily:'Microsoft YaHei';
+		}
+	</fx:Style>
+	<s:layout>
+		<s:VerticalLayout paddingBottom="10" paddingTop="10" paddingLeft="10" paddingRight="10"/>
+	</s:layout>
+	<s:HGroup width="100%" height="30" verticalAlign="justify">
+		<s:Button id="openBTN" label="打开" click="handler_openBTNclick(event)"/>
+		<s:Button id="saveBTN" label="保存" click="handler_saveBTNclick(event)"/>
+		<s:Button id="valueBTN" label="检测" click="handler_valueBTNclick(event)"/>
+		<s:NumericStepper id="sizeNS" maximum="20" minimum="12" value="12" />
+	</s:HGroup>
+	<s:TextArea id="ta" width="100%" height="100%" fontSize="{sizeNS.value}"/>
+		
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+
+			private var _file:File;
+			protected function handler_openBTNclick($evt:MouseEvent):void
+			{
+				if(!_file) 
+				{
+					_file = new File();
+					_file.addEventListener(Event.SELECT, handler_select);
+				}
+				_file.browseForOpen('选择json文件');
+			}
+			
+			private function handler_select($evt:Event):void
+			{
+				var __stream:FileStream = new FileStream();
+				__stream.open(_file, FileMode.READ);
+				var __str:String = __stream.readUTFBytes(__stream.bytesAvailable);
+				ta.text = __str;
+			}
+			
+			protected function handler_valueBTNclick($evt:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				try
+				{
+					JSON.parse(ta.text);
+					Alert.show('没有错误');
+				}
+				catch($err:Error)
+				{
+					Alert.show($err.toString(), '错误！');
+				}
+			}
+			
+			protected function handler_saveBTNclick($evt:MouseEvent):void
+			{
+				_file.save(ta.text);
+			}
+			
+			private function getDesc($name:String):String
+			{
+				var __desc:XML = NativeApplication.nativeApplication.applicationDescriptor;
+				var __ns:Namespace = __desc.namespace();
+				return __desc.__ns::[$name];
+			} 
+			
+			protected function handler_windowedapplication1applicationComplete($evt:FlexEvent):void
+			{
+				this.title = getDesc('name')+' '+getDesc('versionLabel');	
+			}
+			
+		]]>
+	</fx:Script></s:WindowedApplication> 
